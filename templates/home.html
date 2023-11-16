@@ -36,23 +36,17 @@ Data Viewer
 
 <div class="container mt-5">
     <h1 class="mb-3">Select Date and Time Range</h1>
-    <form onsubmit="fetchData()" class="mb-4">
+    <!-- Error Message Div -->
+    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+    <form onsubmit="fetchData()">
         <div class="row g-3 align-items-center">
             <div class="col-auto">
                 <label for="start_date" class="col-form-label">Start Date:</label>
                 <input type="date" id="start_date" name="start_date" class="form-control">
             </div>
             <div class="col-auto">
-                <label for="start_time" class="col-form-label">Start Time (as decimal):</label>
-                <input type="number" step="0.01" id="start_time" name="start_time" class="form-control">
-            </div>
-            <div class="col-auto">
                 <label for="end_date" class="col-form-label">End Date:</label>
                 <input type="date" id="end_date" name="end_date" class="form-control">
-            </div>
-            <div class="col-auto">
-                <label for="end_time" class="col-form-label">End Time (as decimal):</label>
-                <input type="number" step="0.01" id="end_time" name="end_time" class="form-control">
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Get Data</button>
@@ -93,12 +87,10 @@ Data Viewer
 
         // Get the values from the form
         var start_date = document.getElementById('start_date').value;
-        var start_time = document.getElementById('start_time').value;
         var end_date = document.getElementById('end_date').value;
-        var end_time = document.getElementById('end_time').value;
 
         // Create the URL with query parameters
-        var url = `/get_data?start_date=${start_date}&start_time=${start_time}&end_date=${end_date}&end_time=${end_time}`;
+        var url = `/get_data?start_date=${start_date}&end_date=${end_date}`;
 
         // Fetch data from the server
         fetch(url)
@@ -109,10 +101,20 @@ Data Viewer
             .catch(error => console.error('Error:', error));
     }
 
+    function displayError(errorMessage) {
+        var errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = errorMessage; // Set the error message text
+        errorDiv.style.display = 'block'; // Show the error message div
+    }
+
+
     function displayData(data) {
         var table = document.getElementById('data_table');
         var tbody = table.getElementsByTagName('tbody')[0];
         tbody.innerHTML = ''; // Clear existing data
+
+        data = JSON.parse(data)
+        console.log("data to display:", data)
 
         // Add new rows to the table
         data.forEach(item => {
@@ -123,5 +125,6 @@ Data Viewer
             }
         });
     }
+
 </script>
 {% endblock %}
