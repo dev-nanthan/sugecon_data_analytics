@@ -92,14 +92,16 @@ def init_routes(app):
     
     @app.route('/get_data', methods=['GET'])
     def get_data():
-        # Extracting date and time range from request
+        # Extracting date range from request
         start_date = request.args.get('start_date')
-        start_time = float(request.args.get('start_time'))
         end_date = request.args.get('end_date')
-        end_time = float(request.args.get('end_time'))
 
+        # Handle cases where dates might be empty
+        if not start_date or not end_date:
+            return jsonify({"error": "Start date and end date are required."}), 400
+    
         # Filter the data using data_process module
-        filtered_df = data_process.filter_data(start_date, start_time, end_date, end_time)
+        filtered_df = filter_data(start_date, end_date)
 
         # Convert the filtered data to JSON
         result = filtered_df.to_json(orient="records")
