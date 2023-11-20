@@ -40,6 +40,15 @@ Data Viewer
     <div id="error-message" class="alert alert-danger" style="display: none;"></div>
     <form onsubmit="fetchData()">
         <div class="row g-3 align-items-center">
+            <!-- Site Dropdown -->
+            <div class="col-auto">
+                <label for="site" class="col-form-label">Site:</label>
+                <select id="site" name="site" class="form-control">
+                    <!-- Options will be populated here -->
+                </select>
+            </div>
+
+            <!-- Date selection -->
             <div class="col-auto">
                 <label for="start_date" class="col-form-label">Start Date:</label>
                 <input type="date" id="start_date" name="start_date" class="form-control">
@@ -48,6 +57,8 @@ Data Viewer
                 <label for="end_date" class="col-form-label">End Date:</label>
                 <input type="date" id="end_date" name="end_date" class="form-control">
             </div>
+
+            <!-- Submit selection -->
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Get Data</button>
             </div>
@@ -81,16 +92,38 @@ Data Viewer
 {% block additional_scripts %}
 <!-- <script src="{{ url_for('static', filename='./js/home.js') }}"></script> -->
 <script>
+
+    $(window).load(function() {
+    // executes when complete page is fully loaded, including all frames, objects and images
+    
+        function populateSites() {
+            fetch('/get_sites')
+                .then(response => response.json())
+                .then(sites => {
+                    const select = document.getElementById('site');
+                    sites.forEach(site => {
+                        let option = document.createElement('option');
+                        option.value = site.site_id;
+                        option.textContent = site.short_name;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    });
+
     function fetchData() {
         // Prevent the form from submitting normally
         event.preventDefault();
 
         // Get the values from the form
+        var site = document.getElementById('site').value;
         var start_date = document.getElementById('start_date').value;
         var end_date = document.getElementById('end_date').value;
-
-        // Create the URL with query parameters
-        var url = `/get_data?start_date=${start_date}&end_date=${end_date}`;
+        
+        // Include site in the request URL
+        var url = `/get_data?start_date=${start_date}&end_date=${end_date}&site=${site}`;
 
         // Fetch data from the server
         fetch(url)
