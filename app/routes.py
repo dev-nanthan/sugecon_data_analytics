@@ -1,9 +1,10 @@
 from flask import render_template, url_for, redirect, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from .extensions import db
-from .models import User
+from .models import User, Site
 from .data_process import filter_data
 import os
+import csv
 
 def init_routes(app):
     # Handle Landing Page
@@ -106,7 +107,13 @@ def init_routes(app):
         # Convert the filtered data to JSON
         result = filtered_df.to_json(orient="records")
         return jsonify(result)
-  
+    
+    @app.route('/get_sites', methods=['GET'])
+    def get_sites():
+        sites = Site.query.all()
+        print("getting sites list:", sites)
+        return jsonify([{'site_id': site.site_id, 'short_name': site.short_name, 'full_name': site.full_name, 'file_name': site.file_name} for site in sites])
+        
     @app.route('/contact')
     def contact_us():
         return render_template('contact.html', active_page='contact_us')
@@ -121,7 +128,22 @@ def init_routes(app):
     def create_db():
         """Create the database."""
         db.create_all()
+        
         print("Database Tables created.")
+        
+        # Get the sites.csv dir
+        current_dir = os.getcwd()
+        sites_csv_path = os.path.join(current_dir, 'data', 'sites.csv') 
+    
+        with open(sites_csv_path, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip the header row
+            for row in reader:
+                # Assuming the CSV columns are in the order: site_id, short_name, full_name, file_name
+                site = Site(site_id=int(row[0]), short_name=row[1], full_name=row[2], file_name=row[3])
+                db.session.add(site)
+            
+            db.session.commit()
         
     # Command to Clear the database
     @app.cli.command('clear-db')

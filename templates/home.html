@@ -42,19 +42,19 @@ Data Viewer
         <div class="row g-3 align-items-center">
             <!-- Site Dropdown -->
             <div class="col-auto">
-                <label for="site" class="col-form-label">Site:</label>
-                <select id="site" name="site" class="form-control">
-                    <!-- Options will be populated here -->
+                <label for="site" class="col-form-label fw-bold">Select Site:</label>
+                <select id="site" name="site" class="form-select">
+
                 </select>
             </div>
 
             <!-- Date selection -->
             <div class="col-auto">
-                <label for="start_date" class="col-form-label">Start Date:</label>
+                <label for="start_date" class="col-form-label fw-bold">Start Date:</label>
                 <input type="date" id="start_date" name="start_date" class="form-control">
             </div>
             <div class="col-auto">
-                <label for="end_date" class="col-form-label">End Date:</label>
+                <label for="end_date" class="col-form-label fw-bold">End Date:</label>
                 <input type="date" id="end_date" name="end_date" class="form-control">
             </div>
 
@@ -65,7 +65,11 @@ Data Viewer
         </div>
     </form>
 
-    <h2>Data</h2>
+    <div id="report_heading">
+
+    </div>
+
+    <!-- <h2>Data</h2>
     <table id="data_table" class="table table-striped">
         <thead>
             <tr>
@@ -82,9 +86,10 @@ Data Viewer
             </tr>
         </thead>
         <tbody>
-            <!-- Data will be inserted here -->
+            
         </tbody>
-    </table>
+    </table> -->
+    
 </div>
 
 {% endblock %}
@@ -93,10 +98,11 @@ Data Viewer
 <!-- <script src="{{ url_for('static', filename='./js/home.js') }}"></script> -->
 <script>
 
-    $(window).load(function() {
-    // executes when complete page is fully loaded, including all frames, objects and images
-    
+    $( window ).on( "load", function() {
+
+        // Define the site population function
         function populateSites() {
+            console.log("fetching site list")
             fetch('/get_sites')
                 .then(response => response.json())
                 .then(sites => {
@@ -104,14 +110,17 @@ Data Viewer
                     sites.forEach(site => {
                         let option = document.createElement('option');
                         option.value = site.site_id;
-                        option.textContent = site.short_name;
+                        option.textContent = site.full_name;
                         select.appendChild(option);
                     });
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-    });
+        // Call the populate function
+        populateSites()
+
+    } );
 
     function fetchData() {
         // Prevent the form from submitting normally
@@ -121,6 +130,14 @@ Data Viewer
         var site = document.getElementById('site').value;
         var start_date = document.getElementById('start_date').value;
         var end_date = document.getElementById('end_date').value;
+
+        // Set Report Heading Here
+        var sel_site = $( "#site option:selected" ).text();
+        var heading = "Report For Site: " + sel_site
+        var header_div = $('<h2 class = "mt-5"></h2>');
+        header_div.text(heading);
+
+        $('#report_heading').empty().append(header_div);
         
         // Include site in the request URL
         var url = `/get_data?start_date=${start_date}&end_date=${end_date}&site=${site}`;
@@ -132,6 +149,8 @@ Data Viewer
                 displayData(data);
             })
             .catch(error => console.error('Error:', error));
+
+
     }
 
     function displayError(errorMessage) {

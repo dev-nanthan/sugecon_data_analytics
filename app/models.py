@@ -13,3 +13,14 @@ class User(UserMixin, db.Model):
         
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+class Site(db.Model):
+    __tablename__ = 'sites'
+
+    site_id = db.Column(db.Integer, primary_key=True)
+    short_name = db.Column(db.String(50), nullable=False)
+    full_name = db.Column(db.String(100), nullable=False)
+    file_name = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f"<Site {self.short_name}>"
